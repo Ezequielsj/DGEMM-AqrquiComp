@@ -26,7 +26,6 @@ O trabalho compara uma referência em Python e implementações em C que introdu
 - Dimensões: 128 x 128, 256 x 256 e 512 x 512.
 - Protocolo final: cinco medições independentes por variante e dimensão, alvo de 3 segundos de cálculo medido e uma multiplicação de aquecimento não contabilizada; OpenMP foi fixado em quatro threads (`OMP_NUM_THREADS=4`, ajuste dinâmico desativado).
 - A duração real pode exceder o alvo até terminar a multiplicação em andamento. Para a baseline Python, as durações observadas foram aproximadamente 3,06–3,25 s em 128, 3,70–3,95 s em 256 e 17,47–18,21 s em 512.
-- Variantes C com SIMD usam as opções AVX2/FMA; a versão bloqueada usa blocos de 32; OpenMP paraleliza o laço externo dos blocos.
 - Variantes C vetorizadas são compiladas com `-mavx2 -mfma`; os kernels usam intrinsics explícitas de multiplicação e soma, enquanto blocking usa blocos de 32 e OpenMP paraleliza o laço externo dos blocos.
 
 O valor de GFLOPS é calculado pelo coletor a partir de $2N^3$ operações por multiplicação, multiplicado pelo número de multiplicações e dividido pelo tempo de cálculo medido. As tabelas mostram a mediana e a faixa mínimo–máximo das cinco medições, calculadas a partir de `benchmark_resultados_final.csv`.
