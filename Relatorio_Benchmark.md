@@ -11,8 +11,6 @@
 
 Este experimento compara seis implementações de multiplicação de matrizes quadradas em três dimensões: 128, 256 e 512. Foram feitas cinco medições por variante e dimensão, com uma multiplicação de aquecimento por medição. `c_openmp` teve a maior mediana nas três dimensões: 50,102, 30,970 e 25,405 GFLOPS, respectivamente. Os resultados caracterizam esta máquina e esta execução; não garantem o mesmo desempenho em outros ambientes.
 
-## Objetivo
-
 ## Introdução
 
 A multiplicação de matrizes é uma operação central em áreas como computação científica, processamento de imagens e aprendizado de máquina. Seu desempenho depende tanto da quantidade de operações quanto da forma como os dados são organizados e processados pelo hardware. Este trabalho compara implementações progressivamente otimizadas de multiplicação de matrizes: uma referência em Python, uma versão direta em C, vetorização AVX2, desenrolamento de laços, bloqueio de cache e paralelismo com OpenMP. O experimento mede o throughput em diferentes dimensões para observar como essas abordagens se comportam no ambiente avaliado.
@@ -91,6 +89,9 @@ Nesta rodada, OpenMP teve o maior throughput mediano em 128, 256 e 512, e a orde
 
 ## Próximos passos
 
+- Organizar uma seção específica para cada otimização investigada — SIMD/AVX2, desenrolamento de laços e ILP, cache blocking e OpenMP — explicando a alteração no código, o princípio de hardware envolvido e os resultados observados.
+- Explicitar a definição de DGEMM, normalmente expressa como $C \leftarrow \alpha AB + \beta C$, e distinguir essa operação da multiplicação simplificada $C \leftarrow AB$ avaliada pelas implementações deste projeto.
+- Acrescentar referências bibliográficas completas ao livro-texto e relacionar cada otimização às respectivas seções “Going Faster” discutidas em aula.
 - Ampliar a faixa de dimensões, incluindo matrizes maiores que 512 x 512, para observar o efeito de cargas que excedem os níveis menores de cache.
 - Randomizar a ordem das variantes em cada repetição para reduzir efeitos de aquecimento e variação temporal do processador.
 - Aumentar o número de repetições e calcular medidas de dispersão ou intervalos de confiança.
