@@ -9,44 +9,44 @@
 
 ## Resumo
 
-Este experimento compara seis implementações de multiplicação de matrizes quadradas em três dimensões: 128, 256 e 512. Foram feitas cinco medições por variante e dimensão, com uma multiplicação de aquecimento por medição. `c_openmp` teve a maior mediana nas três dimensões: 50,102, 30,970 e 25,405 GFLOPS, respectivamente. Os resultados caracterizam esta máquina e esta execução; não garantem o mesmo desempenho em outros ambientes.
+Este trabalho compara seis implementações de multiplicação de matrizes quadradas, avaliadas nas dimensões 128, 256 e 512. Para cada combinação de variante e dimensão, foram realizadas cinco medições, precedidas por uma multiplicação de aquecimento. A implementação `c_openmp` alcançou a maior mediana de desempenho nos três tamanhos: 50,102, 30,970 e 25,405 GFLOPS, respectivamente. Esses resultados descrevem o comportamento observado nesta máquina e neste protocolo; não devem ser generalizados para outros ambientes.
 
 ## Introdução
 
-A multiplicação de matrizes é uma operação central em computação científica, processamento de imagens e aprendizado de máquina. DGEMM é a operação de multiplicação geral de matrizes em precisão dupla definida pela interface BLAS; em sua forma usual, calcula $C \leftarrow \alpha AB + \beta C$, para dimensões compatíveis e escalares $\alpha$ e $\beta$. Neste projeto, para concentrar a investigação nas otimizações de desempenho, as implementações avaliam o caso quadrado simplificado $C \leftarrow AB$ em precisão dupla, equivalente a $\alpha=1$ e $\beta=0$, e não uma implementação BLAS completa.
+A multiplicação de matrizes é uma operação fundamental em computação científica, processamento de imagens e aprendizado de máquina. DGEMM designa a multiplicação geral de matrizes em precisão dupla da interface BLAS. Em sua forma usual, a operação calcula $C \leftarrow \alpha AB + \beta C$, para matrizes de dimensões compatíveis e escalares $\alpha$ e $\beta$. Este projeto avalia um caso quadrado simplificado, $C \leftarrow AB$, equivalente a $\alpha=1$ e $\beta=0$; portanto, não implementa toda a interface BLAS.
 
-O trabalho compara uma referência em Python e implementações em C que introduzem, progressivamente, vetorização AVX2, desenrolamento de laços, bloqueio de cache e paralelismo com OpenMP. As dimensões variadas permitem observar como o throughput muda com o volume de dados. As técnicas e a discussão foram orientadas pelas seções “Going Faster” do livro-texto, relacionadas ao uso de SIMD, paralelismo em nível de instrução, hierarquia de memória e múltiplos processadores.
+A investigação compara uma implementação de referência em Python com implementações em C às quais são acrescentadas técnicas de otimização: vetorização AVX2, desenrolamento de laços, bloqueio de cache e paralelismo OpenMP. A avaliação em diferentes dimensões permite observar como o desempenho varia com o tamanho do problema. A escolha e a discussão das técnicas seguem as seções “Going Faster” do livro-texto, dedicadas a SIMD, paralelismo em nível de instrução, hierarquia de memória e múltiplos processadores.
 
 ## Ambiente e método
 
-- Ambiente de execução: Ubuntu no WSL 2, kernel Linux 6.6.87.2.
-- Processador informado pelo WSL: Intel Core i5-10210U @ 1,60 GHz, com 8 CPUs lógicas visíveis.
-- Memória total visível ao WSL: 3,73 GiB (`MemTotal` de `/proc/meminfo`).
-- Compilador: GCC 13.3; compilação configurada com `-O3`.
-- Dimensões: 128 x 128, 256 x 256 e 512 x 512.
-- Protocolo final: cinco medições independentes por variante e dimensão, alvo de 3 segundos de cálculo medido e uma multiplicação de aquecimento não contabilizada; OpenMP foi fixado em quatro threads (`OMP_NUM_THREADS=4`, ajuste dinâmico desativado).
-- A duração real pode exceder o alvo até terminar a multiplicação em andamento. Para a baseline Python, as durações observadas foram aproximadamente 3,06–3,25 s em 128, 3,70–3,95 s em 256 e 17,47–18,21 s em 512.
-- Variantes C vetorizadas são compiladas com `-mavx2 -mfma`; os kernels usam intrinsics explícitas de multiplicação e soma, enquanto blocking usa blocos de 32 e OpenMP paraleliza o laço externo dos blocos.
+- Sistema de execução: Ubuntu no WSL 2, kernel Linux 6.6.87.2.
+- Processador: Intel Core i5-10210U a 1,60 GHz, com 8 CPUs lógicas visíveis ao WSL.
+- Memória: 3,73 GiB visíveis ao WSL, conforme `MemTotal` em `/proc/meminfo`.
+- Compilador: GCC 13.3, com otimização `-O3`.
+- Dimensões avaliadas: 128 x 128, 256 x 256 e 512 x 512.
+- Protocolo: cinco medições independentes por variante e dimensão. Cada medição teve duração-alvo de 3 segundos e foi precedida por uma multiplicação de aquecimento não contabilizada. O OpenMP foi configurado para quatro threads (`OMP_NUM_THREADS=4`), com ajuste dinâmico desativado.
+- O tempo medido pode ultrapassar o alvo, pois a execução termina a multiplicação em andamento. Na implementação Python, as medições duraram aproximadamente 3,06–3,25 s para dimensão 128, 3,70–3,95 s para 256 e 17,47–18,21 s para 512.
+- As variantes vetorizadas em C foram compiladas com `-mavx2 -mfma` e usam intrínsecas explícitas de multiplicação e soma. A variante com bloqueio processa blocos de 32 elementos; a variante OpenMP paraleliza o laço externo dos blocos.
 
-O valor de GFLOPS é calculado pelo coletor a partir de $2N^3$ operações por multiplicação, multiplicado pelo número de multiplicações e dividido pelo tempo de cálculo medido. As tabelas mostram a mediana e a faixa mínimo–máximo das cinco medições, calculadas a partir de `benchmark_resultados_final.csv`.
+O coletor estima o desempenho em GFLOPS considerando $2N^3$ operações de ponto flutuante por multiplicação, multiplicadas pelo número de multiplicações realizadas e divididas pelo tempo medido. As tabelas apresentam a mediana e a faixa entre os valores mínimo e máximo das cinco medições, calculadas a partir de `benchmark_resultados_final.csv`.
 
 ## Otimizações avaliadas
 
 ### SIMD com AVX2
 
-A variante `c_avx` processa quatro valores `double` por registrador AVX2 (`__m256d`), usando operações vetoriais de carga, multiplicação e soma. Isso explora paralelismo de dados: uma instrução atua simultaneamente sobre quatro elementos. Em relação à C base, as medianas observadas foram 7,418 contra 2,043 GFLOPS em 128, 4,045 contra 1,158 em 256 e 3,717 contra 0,963 em 512. Esses valores descrevem as implementações; não isolam perfeitamente o ganho do SIMD, pois a base também é compilada com `-O3` e pode ser auto-vetorizada.
+A variante `c_avx` processa quatro valores `double` por registrador AVX2 (`__m256d`), por meio de operações vetoriais de carga, multiplicação e soma. Assim, cada instrução vetorial opera simultaneamente sobre quatro elementos, explorando paralelismo de dados. As medianas medidas foram 7,418 GFLOPS para dimensão 128, 4,045 para 256 e 3,717 para 512; os valores correspondentes da variante C base foram 2,043, 1,158 e 0,963 GFLOPS. A comparação não isola integralmente o efeito do SIMD: a versão base também é compilada com `-O3`, que pode permitir vetorização automática.
 
 ### Desenrolamento de laços e ILP
 
-A variante `c_unrolled` mantém múltiplos acumuladores vetoriais para blocos de linhas e desenrola o trabalho interno. O objetivo é reduzir a sobrecarga de controle dos laços e expor operações independentes ao escalonador do processador, explorando paralelismo em nível de instrução (ILP). Suas medianas foram 18,230, 10,698 e 7,663 GFLOPS para 128, 256 e 512, respectivamente, acima das medianas da variante AVX2 correspondente. A comparação é incremental, mas também altera a organização dos laços e dos acumuladores.
+A variante `c_unrolled` usa vários acumuladores vetoriais para blocos de linhas e desenrola parte dos laços. Essa organização busca reduzir o custo de controle dos laços e expor operações independentes ao processador, favorecendo o paralelismo em nível de instrução (ILP). As medianas foram 18,230, 10,698 e 7,663 GFLOPS nas dimensões 128, 256 e 512, respectivamente, acima dos resultados de `c_avx` nos mesmos tamanhos. A alteração também modifica a organização dos laços e dos acumuladores; portanto, a diferença não mede exclusivamente o efeito do desenrolamento.
 
 ### Bloqueio de cache
 
-A variante `c_blocked` divide a matriz em blocos de 32 elementos e percorre esses blocos para reutilizar dados de A e B enquanto eles estão mais próximos dos núcleos, reduzindo tráfego entre níveis da hierarquia de memória. As medianas foram 22,529, 15,728 e 11,806 GFLOPS para as três dimensões. Comparadas às medianas de `c_unrolled`, correspondem a aumentos observados de aproximadamente 24%, 47% e 54%, respectivamente; isso não deve ser interpretado como efeito isolado do cache, pois o desempenho também depende dos laços e do compilador.
+A variante `c_blocked` particiona o cálculo em blocos de 32 elementos. O objetivo é reutilizar os dados das matrizes A e B enquanto permanecem próximos do núcleo, reduzindo o tráfego pela hierarquia de memória. As medianas foram 22,529, 15,728 e 11,806 GFLOPS para as dimensões 128, 256 e 512. Em relação a `c_unrolled`, isso corresponde a aumentos observados de aproximadamente 24%, 47% e 54%. Esses valores comparam implementações completas e não representam uma medição isolada do efeito do cache.
 
 ### Paralelismo com OpenMP
 
-A variante `c_openmp` distribui entre threads os blocos do laço externo, que escrevem em regiões distintas de C. A execução foi configurada com quatro threads OpenMP. As medianas foram 50,102, 30,970 e 25,405 GFLOPS em 128, 256 e 512. Em relação a `c_blocked`, isso representa fatores observados de aproximadamente 2,22, 1,97 e 2,15. São resultados desta máquina e desta configuração; não equivalem a uma análise de escalabilidade por número de threads.
+A variante `c_openmp` distribui entre threads o trabalho do laço externo sobre os blocos; cada thread atualiza regiões distintas da matriz C. O teste foi configurado com quatro threads. As medianas foram 50,102, 30,970 e 25,405 GFLOPS nas dimensões 128, 256 e 512. Em relação a `c_blocked`, os fatores observados foram aproximadamente 2,22, 1,97 e 2,15. Esses resultados se referem à máquina e à configuração avaliadas; não constituem uma análise de escalabilidade, pois o número de threads não foi variado.
 
 ## Resultados
 
@@ -89,11 +89,11 @@ A variante `c_openmp` distribui entre threads os blocos do laço externo, que es
 
 ## Discussão
 
-A ordenação entre as variantes foi consistente nas três dimensões: OpenMP apresentou a maior mediana, seguido por blocking, unrolling, AVX2, C base e Python. Para cada versão C, o throughput mediano medido diminuiu à medida que a dimensão cresceu de 128 para 512. O gráfico facilita observar essa tendência, mas o experimento não isola qual fator domina.
+A ordenação dos resultados foi a mesma nas três dimensões: OpenMP apresentou a maior mediana, seguido pelas variantes com bloqueio, desenrolamento, AVX2, C base e Python. Entre as versões C, o desempenho mediano diminuiu conforme a dimensão aumentou de 128 para 512. O gráfico ilustra essa tendência, mas os dados não permitem determinar isoladamente qual fator de hardware a explica.
 
-As variantes C vetorizadas usam a mesma sequência de multiplicação e soma AVX2. A comparação deve ser lida como uma progressão entre implementações. Não é uma ablação perfeita: todas as versões C usam `-O3`, que pode auto-vetorizar a base, e as variantes também diferem na organização dos laços e acessos à memória. Portanto, os aumentos apresentados nas seções anteriores são diferenças observadas entre implementações, não estimativas causais isoladas de uma única técnica.
+As variantes C vetorizadas usam a mesma sequência de multiplicação e soma AVX2. Os resultados devem ser interpretados como uma comparação progressiva entre implementações, não como um experimento de ablação rigoroso. Todas as versões C são compiladas com `-O3`, que pode vetorizar automaticamente a implementação base, e as variantes também diferem na organização dos laços e dos acessos à memória. Assim, os aumentos apresentados não podem ser atribuídos exclusivamente a uma única técnica.
 
-Há variação entre as cinco amostras, particularmente para C base em 512 (0,709–0,985 GFLOPS) e OpenMP em 128 (38,177–54,213 GFLOPS), portanto diferenças pequenas não devem ser superinterpretadas.
+Também se observa variação entre as cinco medições. As faixas mais amplas incluem C base em dimensão 512 (0,709–0,985 GFLOPS) e OpenMP em dimensão 128 (38,177–54,213 GFLOPS). Por isso, diferenças pequenas entre resultados devem ser interpretadas com cautela.
 
 ## Limitações
 
@@ -105,7 +105,7 @@ Há variação entre as cinco amostras, particularmente para C base em 512 (0,70
 
 ## Conclusão
 
-Nesta rodada, OpenMP teve o maior throughput mediano em 128, 256 e 512, e a ordem das seis variantes permaneceu igual nos três tamanhos. Cinco repetições e o alinhamento da sequência aritmética tornam a comparação mais consistente, mas ela continua exploratória devido ao número limitado de amostras, à ordem fixa e à ausência de tamanhos acima de 512. Estudos futuros podem aleatorizar a ordem e comparar assembly/contadores de hardware.
+Nesta avaliação, OpenMP alcançou a maior mediana nas três dimensões, e a ordenação das seis variantes permaneceu igual entre os tamanhos testados. As cinco repetições e a padronização das operações aritméticas tornam a comparação mais consistente, mas os resultados ainda são exploratórios: o número de amostras é limitado, a ordem dos testes foi fixa e não foram avaliadas matrizes maiores que 512 x 512. Estudos futuros podem ampliar a faixa de dimensões, variar a ordem das execuções e analisar o código de máquina ou contadores de desempenho do hardware.
 
 ## Próximos passos
 
