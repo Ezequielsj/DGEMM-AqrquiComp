@@ -48,7 +48,7 @@ double dgemm (size_t n, double* A, double* B, double* C)
                             for (int r = 0; r < UNROLL; r++)
                             {
                                 __m256d aa = _mm256_load_pd(A + k * n + r * 4 + i);
-                                c[r] = _mm256_fmadd_pd(aa, bb, c[r]);
+                                c[r] = _mm256_add_pd(c[r], _mm256_mul_pd(aa, bb));
                             }
                         }
 

@@ -32,6 +32,7 @@ O objetivo é medir como as técnicas de otimização impactam o desempenho de u
 - `mkl_lib/`: benchmark com MKL (opcional)
 - `torch_cpu/` e `torch_gpu/`: versões em PyTorch
 - `run_and_collect.py`: orquestra a execução e salva os resultados em CSV
+- `plot_results.py`: gera um gráfico SVG de medianas a partir do CSV
 - `Makefile`: compilação dos executáveis em C
 
 ## Como executar
@@ -39,17 +40,17 @@ O objetivo é medir como as técnicas de otimização impactam o desempenho de u
 No WSL ou em ambiente Linux:
 
 ```bash
-python3 run_and_collect.py --versions baseline_python c_baseline c_avx c_unrolled c_blocked c_openmp --sizes 128 256 512 --num_iterations 3 --seconds 3 --warmup_iterations 1 --threads 4 --output_csv benchmark_resultados_multidimensao.csv
+python3 run_and_collect.py --versions baseline_python c_baseline c_avx c_unrolled c_blocked c_openmp --sizes 128 256 512 --num_iterations 5 --seconds 3 --warmup_iterations 1 --threads 4 --output_csv benchmark_resultados_final.csv
 ```
 
 Execute o comando a partir da pasta raiz do projeto.
 
-`--sizes` aceita dimensões múltiplas de 32 entre 32 e 4096. O protocolo usado nos resultados deste repositório faz três medições independentes, com alvo de 3 segundos, uma multiplicação de aquecimento e quatro threads OpenMP. O tempo real pode exceder o alvo até terminar a multiplicação em andamento. Para um teste rápido do fluxo, reduza `--seconds` e `--num_iterations`.
+`--sizes` aceita dimensões múltiplas de 32 entre 32 e 4096. O protocolo usado nos resultados deste repositório faz cinco medições independentes, com alvo de 3 segundos, uma multiplicação de aquecimento e quatro threads OpenMP. O tempo real pode exceder o alvo até terminar a multiplicação em andamento. Para um teste rápido do fluxo, reduza `--seconds` e `--num_iterations`.
 
 As versões opcionais MKL e PyTorch ainda usam dimensão fixa 512; para executá-las, use `--sizes 512`. Exemplo:
 
 ```bash
-python3 run_and_collect.py --versions baseline_python c_baseline c_avx c_unrolled c_blocked c_openmp mkl_lib torch_cpu torch_gpu --sizes 512 --num_iterations 3 --seconds 3 --warmup_iterations 1 --threads 4 --output_csv benchmark_resultados_completos.csv
+python3 run_and_collect.py --versions baseline_python c_baseline c_avx c_unrolled c_blocked c_openmp mkl_lib torch_cpu torch_gpu --sizes 512 --num_iterations 5 --seconds 3 --warmup_iterations 1 --threads 4 --output_csv benchmark_resultados_completos.csv
 ```
 
 ## Métricas coletadas
@@ -77,4 +78,12 @@ O coletor grava uma linha por medição e mostra a mediana de GFLOPS por variant
 
 As implementações C comparam cada elemento da matriz resultante com uma multiplicação escalar de referência e usam temporizador monotônico. O checksum é um resumo numérico registrado no CSV; ele não é, por si só, a validação da matriz.
 
-`benchmark_resultados_multidimensao.csv` contém os 54 resultados desta análise (três dimensões, seis variantes e três repetições por combinação), incluindo metadados. O relatório usa este conjunto de dados.
+`benchmark_resultados_final.csv` contém os 90 resultados desta análise (três dimensões, seis variantes e cinco repetições por combinação), incluindo metadados. O relatório e o gráfico usam este conjunto de dados.
+
+Gere novamente o gráfico SVG com:
+
+```bash
+python3 plot_results.py benchmark_resultados_final.csv --output grafico_desempenho.svg
+```
+
+As variantes C SIMD usam a mesma operação AVX2 de multiplicação e soma; `c_unrolled`, `c_blocked` e `c_openmp` acrescentam, respectivamente, desenrolamento, tiling e paralelismo. A compilação `-O3` também pode otimizar a versão C base, então a comparação é entre implementações completas, não uma ablação isolada de cada instrução.

@@ -50,8 +50,7 @@ void do_block (size_t n, size_t si, size_t sj, size_t sk,
                     // Load A[i + r*4 .. i + r*4 + 3][k]
                     __m256d aa = _mm256_load_pd(A + k * n + r * 4 + i);
 
-                    // Fused Multiply-Add: c[r] += aa * bb
-                    c[r] = _mm256_fmadd_pd(aa, bb, c[r]);
+                    c[r] = _mm256_add_pd(c[r], _mm256_mul_pd(aa, bb));
                 }
             }
 

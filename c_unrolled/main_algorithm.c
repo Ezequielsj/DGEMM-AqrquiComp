@@ -51,9 +51,7 @@ double dgemm (size_t n, double* A, double* B, double* C)
                     // Load A[i + r*4 .. i + r*4 + 3][k]
                     __m256d aa = _mm256_load_pd(A + k * n + r * 4 + i);
 
-                    // Multiply A * B and accumulate into C: c[r] += aa * bb
-                    // AVX2 supports Fused Multiply-Add (FMA) for better performance.
-                    c[r] = _mm256_fmadd_pd(aa, bb, c[r]);
+                    c[r] = _mm256_add_pd(c[r], _mm256_mul_pd(aa, bb));
                 }
             }
 
