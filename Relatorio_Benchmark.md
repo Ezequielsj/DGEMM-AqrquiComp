@@ -115,9 +115,15 @@ Nesta avaliação, OpenMP alcançou a maior mediana nas três dimensões, e a or
 - Registrar a configuração efetiva de threads e, quando disponível, acompanhar utilização de CPU e frequência durante os testes.
 - Comparar o código gerado pelo compilador e, se possível, usar contadores de hardware para investigar os efeitos de vetorização, cache e paralelismo.
 
-## Referências
+## 12. Referências
 
-- PATTERSON, David A.; HENNESSY, John L. *Computer Organization and Design: The Hardware/Software Interface, RISC-V Edition*. 2. ed. Morgan Kaufmann, 2020. Seções “Going Faster”: 3.8, “Subword Parallelism and Matrix Multiply”; 4.12, “Instruction-Level Parallelism and Matrix Multiply”; 5.15, “Cache Blocking and Matrix Multiply”; e 6.12, “Multiple Processors and Matrix Multiply”.
+- PATTERSON, David A.; HENNESSY, John L. *Computer Organization and Design RISC-V Edition: The Hardware/Software Interface*. 2nd ed. Morgan Kaufmann, 2021. ISBN 978-0-12-820331-6. Seções “Going Faster”: 3.8, “Subword Parallelism and Matrix Multiply”; 4.12, “Instruction-Level Parallelism and Matrix Multiply”; 5.15, “Cache Blocking and Matrix Multiply”; e 6.12, “Multiple Processors and Matrix Multiply”.
+- NETLIB. *DGEMM: Double-precision general matrix-matrix multiplication*. Disponível em: [netlib.org/blas/dgemm.f](https://www.netlib.org/blas/dgemm.f). Acesso em: 3 out. 2026.
+- GCC PROJECT. *GCC online documentation: Optimize Options*. Disponível em: [gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html](https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html). Acesso em: 3 out. 2026.
+- GCC PROJECT. *GCC online documentation: x86 Options*. Disponível em: [gcc.gnu.org/onlinedocs/gcc/x86-Options.html](https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html). Acesso em: 3 out. 2026.
+- INTEL. *Intel Intrinsics Guide*. Disponível em: [intel.com/content/www/us/en/docs/intrinsics-guide](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html). Acesso em: 3 out. 2026.
+- OPENMP ARCHITECTURE REVIEW BOARD. *OpenMP specifications*. Disponível em: [openmp.org/specifications](https://www.openmp.org/specifications/). Acesso em: 3 out. 2026.
+- PYTHON SOFTWARE FOUNDATION. *Python 3 documentation: time — Time access and conversions*. Disponível em: [docs.python.org/3/library/time.html](https://docs.python.org/3/library/time.html). Acesso em: 3 out. 2026.
 
 ## Artefatos
 
