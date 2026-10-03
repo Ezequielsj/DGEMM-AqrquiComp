@@ -83,6 +83,8 @@ Nesta rodada, OpenMP teve o maior throughput mediano em 128, 256 e 512, e a orde
 
 ## Artefatos
 
+Repositório do projeto: [github.com/Ezequielsj/DGEMM-AqrquiComp](https://github.com/Ezequielsj/DGEMM-AqrquiComp).
+
 Os 54 resultados individuais desta análise estão em `benchmark_resultados_multidimensao.csv`. Para repetir o experimento a partir da raiz do projeto:
 
 ```bash
