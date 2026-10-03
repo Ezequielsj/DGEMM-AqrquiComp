@@ -13,7 +13,9 @@ Este experimento compara seis implementações de multiplicação de matrizes qu
 
 ## Objetivo
 
-Observar como implementação nativa, SIMD, desenrolamento de laços, bloqueio de cache e paralelismo OpenMP afetam o desempenho de uma multiplicação de matrizes. O benchmark registra dimensão, número de multiplicações, tempo acumulado, throughput estimado e horário da execução.
+## Introdução
+
+A multiplicação de matrizes é uma operação central em áreas como computação científica, processamento de imagens e aprendizado de máquina. Seu desempenho depende tanto da quantidade de operações quanto da forma como os dados são organizados e processados pelo hardware. Este trabalho compara implementações progressivamente otimizadas de multiplicação de matrizes: uma referência em Python, uma versão direta em C, vetorização AVX2, desenrolamento de laços, bloqueio de cache e paralelismo com OpenMP. O experimento mede o throughput em diferentes dimensões para observar como essas abordagens se comportam no ambiente avaliado.
 
 ## Ambiente e método
 
@@ -86,6 +88,14 @@ Há variação entre as cinco amostras, particularmente para C base em 512 (0,70
 ## Conclusão
 
 Nesta rodada, OpenMP teve o maior throughput mediano em 128, 256 e 512, e a ordem das seis variantes permaneceu igual nos três tamanhos. Cinco repetições e o alinhamento da sequência aritmética tornam a comparação mais consistente, mas ela continua exploratória devido ao número limitado de amostras, à ordem fixa e à ausência de tamanhos acima de 512. Estudos futuros podem aleatorizar a ordem e comparar assembly/contadores de hardware.
+
+## Próximos passos
+
+- Ampliar a faixa de dimensões, incluindo matrizes maiores que 512 x 512, para observar o efeito de cargas que excedem os níveis menores de cache.
+- Randomizar a ordem das variantes em cada repetição para reduzir efeitos de aquecimento e variação temporal do processador.
+- Aumentar o número de repetições e calcular medidas de dispersão ou intervalos de confiança.
+- Registrar a configuração efetiva de threads e, quando disponível, acompanhar utilização de CPU e frequência durante os testes.
+- Comparar o código gerado pelo compilador e, se possível, usar contadores de hardware para investigar os efeitos de vetorização, cache e paralelismo.
 
 ## Artefatos
 
